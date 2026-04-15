@@ -3,15 +3,7 @@ import { auth } from "./config";
 
 const provider = new GoogleAuthProvider();
 
-function isIOS() {
-  return /iPhone|iPad|iPod/i.test(navigator.userAgent);
-}
-
 export async function signInWithGoogle() {
-  if (isIOS()) {
-    await signInWithRedirect(auth, provider);
-    return null;
-  }
   try {
     const result = await signInWithPopup(auth, provider);
     return result.user;

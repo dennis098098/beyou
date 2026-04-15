@@ -3,17 +3,20 @@ import { auth } from "./config";
 
 const provider = new GoogleAuthProvider();
 
-function isMobile() {
-  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-}
-
 export async function signInWithGoogle() {
-  if (isMobile()) {
-    await signInWithRedirect(auth, provider);
-    return null; // redirect navigates away, result handled in handleRedirectResult
+  try {
+    // Try popup first — works on all modern browsers including mobile
+    const result = await signInWithPopup(auth, provider);
+    return result.user;
+  } catch (err: unknown) {
+    const code = (err as { code?: string })?.code;
+    // If popup was blocked, fall back to redirect
+    if (code === "auth/popup-blocked" || code === "auth/popup-cancelled-by-user") {
+      await signInWithRedirect(auth, provider);
+      return null;
+    }
+    throw err;
   }
-  const result = await signInWithPopup(auth, provider);
-  return result.user;
 }
 
 export async function handleRedirectResult() {

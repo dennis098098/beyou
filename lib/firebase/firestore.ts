@@ -3,6 +3,7 @@ import {
   getDoc,
   setDoc,
   updateDoc,
+  deleteDoc,
   onSnapshot,
   writeBatch,
   Unsubscribe,
@@ -23,12 +24,15 @@ export async function createUser(uid: string, data: Partial<UserProfile>): Promi
     uid,
     name: "",
     birthday: "",
+    gender: null,
+    avatar: null,
     mbti: null,
     calendarType: null,
     setupComplete: false,
     coverSelected: false,
     calendarStartDate: null,
     lastTearDate: null,
+    lastTearDates: { positive: null, funny: null },
     totalPagesTorn: 0,
     createdAt: Date.now(),
     ...data,
@@ -39,10 +43,16 @@ export async function updateUser(uid: string, data: Partial<UserProfile>): Promi
   await updateDoc(doc(db, "users", uid), data as Record<string, unknown>);
 }
 
-export function subscribeToUser(uid: string, callback: (profile: UserProfile | null) => void): Unsubscribe {
-  return onSnapshot(doc(db, "users", uid), (snap) => {
-    callback(snap.exists() ? (snap.data() as UserProfile) : null);
-  });
+export function subscribeToUser(
+  uid: string,
+  callback: (profile: UserProfile | null) => void,
+  onError?: (err: Error) => void
+): Unsubscribe {
+  return onSnapshot(
+    doc(db, "users", uid),
+    (snap) => { callback(snap.exists() ? (snap.data() as UserProfile) : null); },
+    (err) => { onError?.(err); }
+  );
 }
 
 // ── Sentences ─────────────────────────────────────────────────
@@ -53,21 +63,49 @@ export async function getSentence(uid: string, dateKey: string): Promise<Sentenc
   return snap.data() as SentenceDoc;
 }
 
+export async function deleteSentence(uid: string, dateKey: string): Promise<void> {
+  await deleteDoc(doc(db, "users", uid, "sentences", dateKey));
+}
+
 export async function saveSentence(uid: string, dateKey: string, data: SentenceDoc): Promise<void> {
   await setDoc(doc(db, "users", uid, "sentences", dateKey), data);
 }
 
-export async function tearPage(uid: string, dateKey: string): Promise<void> {
+export async function resetUser(uid: string): Promise<void> {
+  await setDoc(doc(db, "users", uid), {
+    uid,
+    name: "",
+    birthday: "",
+    gender: null,
+    avatar: null,
+    mbti: null,
+    calendarType: null,
+    setupComplete: false,
+    coverSelected: false,
+    calendarStartDate: null,
+    lastTearDate: null,
+    lastTearDates: { positive: null, funny: null },
+    totalPagesTorn: 0,
+    createdAt: Date.now(),
+  });
+}
+
+export async function tearPage(uid: string, dateKey: string, calendarType: string): Promise<void> {
   const batch = writeBatch(db);
 
-  batch.update(doc(db, "users", uid, "sentences", dateKey), {
-    torn: true,
-    tornAt: Date.now(),
-  });
+  const sentenceKey = `${dateKey}_${calendarType}`;
+  batch.set(
+    doc(db, "users", uid, "sentences", sentenceKey),
+    { torn: true, tornAt: Date.now() },
+    { merge: true }
+  );
 
+  const currentTotal =
+    (await getDoc(doc(db, "users", uid))).data()?.totalPagesTorn ?? 0;
   batch.update(doc(db, "users", uid), {
     lastTearDate: dateKey,
-    totalPagesTorn: ((await getDoc(doc(db, "users", uid))).data()?.totalPagesTorn ?? 0) + 1,
+    [`lastTearDates.${calendarType}`]: dateKey,
+    totalPagesTorn: currentTotal + 1,
   });
 
   await batch.commit();

@@ -12,10 +12,10 @@ export function GoogleSignInButton() {
     setError(null);
     try {
       await signInWithGoogle();
+      // signInWithRedirect navigates away — no need to setIsLoading(false)
     } catch (err) {
       console.error("Google sign in error:", err);
       setError("登入失敗，請再試一次");
-    } finally {
       setIsLoading(false);
     }
   }

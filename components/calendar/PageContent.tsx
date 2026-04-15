@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { CalendarType } from "@/types";
 import { formatDateDisplay } from "@/lib/utils/dateUtils";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
@@ -10,57 +11,47 @@ interface PageContentProps {
   isLoading: boolean;
   calendarType: CalendarType;
   dayNumber: number;
+  hideContent?: boolean;
 }
 
-export function PageContent({ dateKey, sentence, isLoading, calendarType, dayNumber }: PageContentProps) {
+export function PageContent({ dateKey, sentence, isLoading, calendarType, dayNumber, hideContent = false }: PageContentProps) {
   const { month, day, weekday } = formatDateDisplay(dateKey);
 
-  const accentColor = calendarType === "funny"
-    ? "text-orange-500"
-    : "text-teal-500";
+  const accentColor = calendarType === "funny" ? "text-orange-500" : "text-teal-500";
 
   return (
     <div className="flex flex-col h-full select-none">
-      {/* Day number badge */}
-      <div className="text-center mb-2">
-        <span className={`text-xs font-medium ${accentColor} opacity-70`}>
-          第 {dayNumber} 天
-        </span>
+      {/* Cover image — top 60% */}
+      <div className="relative w-full h-44 rounded-2xl overflow-hidden">
+        <Image src={calendarType === "funny" ? "/cover-bg-fun.jpg" : "/cover-bg.jpg"} alt="" fill className="object-cover object-center" />
       </div>
 
-      {/* Date display */}
-      <div className="text-center mb-4">
-        <div className="text-6xl font-black text-gray-800 leading-none">{day}</div>
-        <div className="flex items-center justify-center gap-2 mt-1">
-          <span className="text-gray-400 text-sm">{month} 月</span>
-          <span className={`text-sm font-medium ${accentColor}`}>{weekday}</span>
+      {/* Bottom white area */}
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-4 gap-2">
+        {/* Date */}
+        <div className="text-center">
+          <div className="text-5xl font-black text-gray-800 leading-none">{day}</div>
+          <div className="flex items-center justify-center gap-2 mt-1">
+            <span className="text-gray-400 text-sm">{month} 月</span>
+            <span className={`text-sm font-medium ${accentColor}`}>{weekday}</span>
+          </div>
         </div>
-      </div>
 
-      {/* Perforated divider */}
-      <div className="flex items-center gap-1 my-3 px-4">
-        {[...Array(20)].map((_, i) => (
-          <div key={i} className="flex-1 h-px bg-gray-200" />
-        ))}
-      </div>
-
-      {/* Sentence */}
-      <div className="flex-1 flex items-center justify-center px-4 py-2">
-        {isLoading ? (
-          <LoadingSpinner />
-        ) : sentence ? (
-          <p className={`text-center text-lg font-medium leading-relaxed text-gray-700
-            ${calendarType === "funny" ? "font-['serif']" : ""}`}>
-            {sentence}
-          </p>
-        ) : (
-          <p className="text-gray-400 text-sm text-center">今日句子載入中...</p>
+        {/* Sentence */}
+        {!hideContent && (
+          <div className="w-full text-center mt-2">
+            {isLoading ? (
+              <LoadingSpinner />
+            ) : sentence ? (
+              <p className={`text-base font-medium leading-relaxed text-gray-700
+                ${calendarType === "funny" ? "font-['serif']" : ""}`}>
+                {sentence}
+              </p>
+            ) : (
+              <p className="text-gray-400 text-sm">今日句子載入中...</p>
+            )}
+          </div>
         )}
-      </div>
-
-      {/* Bottom decoration */}
-      <div className={`text-center mt-3 text-2xl ${calendarType === "funny" ? "" : "opacity-60"}`}>
-        {calendarType === "funny" ? "😄" : "🌱"}
       </div>
     </div>
   );

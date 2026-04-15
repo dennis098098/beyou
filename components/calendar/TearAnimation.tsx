@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { motion, useMotionValue, useTransform, AnimatePresence } from "framer-motion";
+import { motion, useMotionValue, useTransform, AnimatePresence, type Transition } from "framer-motion";
 
 interface TearAnimationProps {
   children: React.ReactNode;
@@ -10,7 +10,7 @@ interface TearAnimationProps {
 }
 
 export function TearAnimation({ children, canTear, onTearComplete }: TearAnimationProps) {
-  const [phase, setPhase] = useState<"idle" | "tearing" | "tornAway">("idle");
+  const [phase, setPhase] = useState<"idle" | "tearing" | "flip" | "tornAway">("idle");
   const y = useMotionValue(0);
   const rotate = useTransform(y, [-150, 0], [-8, 0]);
   const scale = useTransform(y, [-150, 0], [1.03, 1]);
@@ -18,10 +18,19 @@ export function TearAnimation({ children, canTear, onTearComplete }: TearAnimati
 
   async function triggerTear() {
     if (!canTear || phase !== "idle") return;
+
+    // Phase 1: shake
     setPhase("tearing");
     await new Promise((r) => setTimeout(r, 300));
+
+    // Phase 2: flip up (page turn effect)
+    setPhase("flip");
+    await new Promise((r) => setTimeout(r, 400));
+
+    // Phase 3: fly away
     setPhase("tornAway");
     await new Promise((r) => setTimeout(r, 500));
+
     onTearComplete();
     setPhase("idle");
     y.set(0);
@@ -36,8 +45,17 @@ export function TearAnimation({ children, canTear, onTearComplete }: TearAnimati
     }
   }
 
+  const animateVariant: { y: number; rotateX: number; rotate: number | number[]; opacity: number; scale: number; transition: Transition } =
+    phase === "tearing"
+      ? { y: -20, rotateX: 0, rotate: [-2, 3, -3, 2, 0], opacity: 1, scale: 1, transition: { duration: 0.3 } }
+      : phase === "flip"
+      ? { y: -60, rotateX: -35, rotate: -4, opacity: 1, scale: 1.04, transition: { duration: 0.35, ease: "easeIn" as const } }
+      : phase === "tornAway"
+      ? { y: -700, rotateX: -80, rotate: 18, opacity: 0, scale: 0.8, transition: { duration: 0.45, ease: [0.4, 0, 1, 1] as [number, number, number, number] } }
+      : { y: 0, rotateX: 0, rotate: 0, opacity: 1, scale: 1, transition: { duration: 0.3 } };
+
   return (
-    <div className="relative">
+    <div className="relative" style={{ perspective: "800px" }}>
       <AnimatePresence>
         {phase === "tearing" && (
           <motion.div
@@ -58,15 +76,9 @@ export function TearAnimation({ children, canTear, onTearComplete }: TearAnimati
         drag={canTear && phase === "idle" ? "y" : false}
         dragConstraints={{ top: -200, bottom: 0 }}
         dragElastic={0.3}
-        style={{ y, rotate, scale }}
+        style={{ y, rotate, scale, transformStyle: "preserve-3d" }}
         onDragEnd={handleDragEnd}
-        animate={
-          phase === "tearing"
-            ? { y: -30, rotate: [-2, 3, -3, 2, 0], transition: { duration: 0.3 } }
-            : phase === "tornAway"
-            ? { y: -600, rotate: 20, opacity: 0, transition: { duration: 0.5, ease: [0.4, 0, 1, 1] } }
-            : {}
-        }
+        animate={animateVariant}
         className={canTear && phase === "idle" ? "cursor-grab active:cursor-grabbing" : ""}
       >
         {children}

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { CalendarType } from "@/types";
 
 interface CoverCardProps {
@@ -11,7 +12,7 @@ interface CoverCardProps {
 const COVER_DATA = {
   funny: {
     emoji: "😄",
-    title: "幽默日曆",
+    title: "Be Fun",
     subtitle: "每天笑著面對人生的荒謬",
     description: "帶點自嘲、帶點荒謬，讓你每天早上先笑一個",
     bg: "from-yellow-50 to-orange-50",
@@ -21,7 +22,7 @@ const COVER_DATA = {
   },
   positive: {
     emoji: "🌱",
-    title: "正向日曆",
+    title: "Be Positive",
     subtitle: "每天一句溫暖，陪你踏實前行",
     description: "低調的鼓勵，像智慧朋友留給你的便條",
     bg: "from-green-50 to-teal-50",
@@ -53,19 +54,18 @@ export function CoverCard({ type, selected, onSelect }: CoverCardProps) {
 
       {/* Calendar cover visual */}
       <div className="flex flex-col items-center mb-4">
-        <div className="w-full bg-white rounded-xl shadow-inner p-4 mb-3">
+        <div className="w-full rounded-xl overflow-hidden shadow-inner mb-3">
           {/* Calendar binding holes */}
-          <div className="flex justify-center gap-6 mb-3">
+          <div className="flex justify-center gap-6 pt-3 pb-2 bg-white">
             {[...Array(3)].map((_, i) => (
               <div key={i} className="w-3 h-3 rounded-full bg-gray-200 border border-gray-300" />
             ))}
           </div>
-          <div className="text-center">
-            <div className="text-5xl mb-2">{data.emoji}</div>
-            <div className="text-lg font-bold text-gray-700">{data.title}</div>
+          <div className="relative w-full h-36">
+            <Image src={type === "funny" ? "/cover-bg-fun.jpg" : "/cover-bg.jpg"} alt="封面" fill className="object-cover object-center" />
           </div>
           {/* Perforated line */}
-          <div className="mt-3 border-t-2 border-dashed border-gray-200" />
+          <div className="border-t-2 border-dashed border-gray-200 bg-white py-1" />
         </div>
         <span className={`text-xs font-medium px-3 py-1 rounded-full ${data.badge}`}>
           MBTI 個性化

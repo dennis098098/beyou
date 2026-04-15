@@ -1,5 +1,8 @@
 export type CalendarType = "funny" | "positive";
 
+export type AvatarId = "shiba" | "cat" | "fox" | "rabbit" | "bear" | "deer" | "koala" | "penguin";
+export type Gender = "male" | "female" | "other" | null;
+
 export type MBTIType =
   | "INTJ" | "INTP" | "ENTJ" | "ENTP"
   | "INFJ" | "INFP" | "ENFJ" | "ENFP"
@@ -11,12 +14,15 @@ export interface UserProfile {
   uid: string;
   name: string;
   birthday: string; // "YYYY-MM-DD"
+  gender: Gender;
+  avatar: AvatarId | null;
   mbti: MBTIType;
   calendarType: CalendarType | null;
   setupComplete: boolean;
   coverSelected: boolean;
   calendarStartDate: string | null; // "YYYY-MM-DD"
-  lastTearDate: string | null; // "YYYY-MM-DD"
+  lastTearDate: string | null; // "YYYY-MM-DD" (legacy, kept for compatibility)
+  lastTearDates: Record<string, string | null>; // per calendarType: { positive, funny }
   totalPagesTorn: number;
   createdAt: number; // timestamp ms
 }

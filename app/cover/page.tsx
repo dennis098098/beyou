@@ -36,8 +36,8 @@ export default function CoverPage() {
       </div>
 
       <div className="flex flex-col gap-4 max-w-sm mx-auto w-full flex-1">
-        <CoverCard type="funny" selected={selected === "funny"} onSelect={() => setSelected("funny")} />
         <CoverCard type="positive" selected={selected === "positive"} onSelect={() => setSelected("positive")} />
+        <CoverCard type="funny" selected={selected === "funny"} onSelect={() => setSelected("funny")} />
       </div>
 
       <div className="max-w-sm mx-auto w-full mt-6 pb-8">
@@ -46,7 +46,7 @@ export default function CoverPage() {
           disabled={!selected || isSubmitting}
           className="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold py-4 rounded-2xl transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg"
         >
-          {isSubmitting ? "確認中..." : selected ? `選擇《${selected === "funny" ? "幽默日曆" : "正向日曆"}》` : "請選擇日曆"}
+          {isSubmitting ? "確認中..." : selected ? `選擇《${selected === "funny" ? "Be Fun" : "Be Positive"}》` : "請選擇日曆"}
         </button>
       </div>
     </div>

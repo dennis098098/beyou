@@ -17,15 +17,26 @@ export function useUserProfile(user: User | null) {
     }
 
     setIsLoadingProfile(true);
-    const unsubscribe = subscribeToUser(user.uid, async (data) => {
-      if (!data) {
-        // First time: create the user document
-        await createUser(user.uid, { uid: user.uid });
-      } else {
-        setProfile(data);
+    const unsubscribe = subscribeToUser(
+      user.uid,
+      async (data) => {
+        if (!data) {
+          try {
+            await createUser(user.uid, { uid: user.uid });
+          } catch (err) {
+            console.error("createUser error:", err);
+            setIsLoadingProfile(false);
+          }
+        } else {
+          setProfile(data);
+          setIsLoadingProfile(false);
+        }
+      },
+      (err) => {
+        console.error("subscribeToUser error:", err);
+        setIsLoadingProfile(false);
       }
-      setIsLoadingProfile(false);
-    });
+    );
 
     return unsubscribe;
   }, [user]);

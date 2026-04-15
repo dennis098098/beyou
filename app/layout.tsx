@@ -12,6 +12,10 @@ const notoSansTC = Noto_Sans_TC({
 export const metadata: Metadata = {
   title: "手撕日曆",
   description: "每天一句話，根據你的 MBTI 量身打造",
+  icons: {
+    icon: "/app-icon.png",
+    apple: "/app-icon.png",
+  },
 };
 
 export const viewport: Viewport = {
@@ -27,7 +31,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-TW" className={`${notoSansTC.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col font-[var(--font-noto)]">
+      <body className="min-h-full flex flex-col">
         <AppProvider>{children}</AppProvider>
       </body>
     </html>

@@ -18,7 +18,7 @@ export default function IntroPage() {
       </div>
 
       <h1 className="text-2xl font-black text-gray-800 mb-3">
-        {isFunny ? "幽默日曆，已開封！" : "正向日曆，已開封！"}
+        {isFunny ? "Be Fun，已開封！" : "Be Positive，已開封！"}
       </h1>
 
       <p className="text-gray-600 text-base leading-relaxed mb-2 max-w-xs">

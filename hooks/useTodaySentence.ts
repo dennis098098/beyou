@@ -23,13 +23,14 @@ export function useTodaySentence(
     }
 
     const dateKey = getTodayKey();
+    const sentenceKey = `${dateKey}_${calendarType}`;
 
     async function fetchSentence() {
       setIsLoading(true);
       setError(null);
       try {
         // Check Firestore cache first
-        const cached = await getSentence(uid!, dateKey);
+        const cached = await getSentence(uid!, sentenceKey);
         if (cached?.sentence) {
           setSentence(cached.sentence);
           setIsLoading(false);
@@ -46,7 +47,7 @@ export function useTodaySentence(
         });
 
         // Cache in Firestore
-        await saveSentence(uid!, dateKey, {
+        await saveSentence(uid!, sentenceKey, {
           sentence: generated,
           calendarType: calendarType!,
           mbti,

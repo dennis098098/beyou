@@ -4,10 +4,16 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAppContext } from "@/contexts/AppContext";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { handleRedirectResult } from "@/lib/firebase/auth";
 
 export default function GatePage() {
   const { user, profile, isLoadingAuth, isLoadingProfile } = useAppContext();
   const router = useRouter();
+
+  // Handle redirect result from Google sign-in (fallback for iOS/popup-blocked)
+  useEffect(() => {
+    handleRedirectResult().catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (isLoadingAuth || isLoadingProfile) return;

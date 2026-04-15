@@ -3,13 +3,21 @@ import { auth } from "./config";
 
 const provider = new GoogleAuthProvider();
 
+const REDIRECT_FALLBACK_CODES = new Set([
+  "auth/popup-blocked",
+  "auth/popup-cancelled-by-user",
+  "auth/cancelled-popup-request",
+  "auth/operation-not-supported-in-this-environment",
+  "auth/web-storage-unsupported",
+]);
+
 export async function signInWithGoogle() {
   try {
     const result = await signInWithPopup(auth, provider);
     return result.user;
   } catch (err: unknown) {
-    const code = (err as { code?: string })?.code;
-    if (code === "auth/popup-blocked" || code === "auth/popup-cancelled-by-user") {
+    const code = (err as { code?: string })?.code ?? "";
+    if (REDIRECT_FALLBACK_CODES.has(code)) {
       await signInWithRedirect(auth, provider);
       return null;
     }

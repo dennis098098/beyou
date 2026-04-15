@@ -137,6 +137,10 @@ export default function CalendarPage() {
           onClick={async () => {
             if (!user?.uid) return;
             await deleteSentence(user.uid, `${getTodayKey()}_${profile?.calendarType ?? "positive"}`);
+            // Clear analysis / luck bonus from localStorage
+            try {
+              localStorage.removeItem(`overlay_${user.uid}_${getTodayKey()}`);
+            } catch {}
             window.location.reload();
           }}
           className="fixed bottom-4 right-4 text-xs text-gray-300 underline"

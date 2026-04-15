@@ -3,17 +3,18 @@ import { auth } from "./config";
 
 const provider = new GoogleAuthProvider();
 
-function isMobile() {
-  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-}
-
 export async function signInWithGoogle() {
-  if (isMobile()) {
-    await signInWithRedirect(auth, provider);
-    return null;
+  try {
+    const result = await signInWithPopup(auth, provider);
+    return result.user;
+  } catch (err: unknown) {
+    const code = (err as { code?: string })?.code;
+    if (code === "auth/popup-blocked" || code === "auth/popup-cancelled-by-user") {
+      await signInWithRedirect(auth, provider);
+      return null;
+    }
+    throw err;
   }
-  const result = await signInWithPopup(auth, provider);
-  return result.user;
 }
 
 export async function handleRedirectResult() {

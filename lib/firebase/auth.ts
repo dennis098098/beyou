@@ -3,15 +3,24 @@ import { auth } from "./config";
 
 const provider = new GoogleAuthProvider();
 
+function isIOS() {
+  if (typeof navigator === "undefined") return false;
+  return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
 export async function signInWithGoogle() {
+  // iOS (including Telegram/Line SFSafariViewController) — use redirect
+  if (isIOS()) {
+    await signInWithRedirect(auth, provider);
+    return null;
+  }
+  // Desktop / Android — use popup with redirect fallback
   try {
     const result = await signInWithPopup(auth, provider);
     return result.user;
   } catch (err: unknown) {
     const code = (err as { code?: string })?.code ?? "";
-    // User explicitly cancelled — don't redirect
     if (code === "auth/user-cancelled") throw err;
-    // All other popup failures → fall back to redirect
     await signInWithRedirect(auth, provider);
     return null;
   }

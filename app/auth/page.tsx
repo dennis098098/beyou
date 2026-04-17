@@ -13,9 +13,12 @@ export default function AuthPage() {
   const { user, isLoadingAuth } = useAppContext();
   const router = useRouter();
 
-  // Handle mobile redirect result when returning from Google
+  // Handle iOS redirect result — explicitly navigate on success
   useEffect(() => {
-    handleRedirectResult().catch(() => {});
+    handleRedirectResult().then((u) => {
+      if (u) router.replace("/");
+    }).catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

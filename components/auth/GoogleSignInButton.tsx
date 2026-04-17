@@ -25,8 +25,9 @@ export function GoogleSignInButton() {
     try {
       await signInWithGoogle();
     } catch (err) {
-      console.error("Google sign in error:", err);
-      setError("登入失敗，請再試一次");
+      const code = (err as { code?: string })?.code ?? "unknown";
+      console.error("Google sign in error:", code, err);
+      setError(`登入失敗 (${code})`);
       setIsLoading(false);
     }
   }

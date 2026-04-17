@@ -3,25 +3,17 @@ import { auth } from "./config";
 
 const provider = new GoogleAuthProvider();
 
-const REDIRECT_FALLBACK_CODES = new Set([
-  "auth/popup-blocked",
-  "auth/popup-cancelled-by-user",
-  "auth/cancelled-popup-request",
-  "auth/operation-not-supported-in-this-environment",
-  "auth/web-storage-unsupported",
-]);
-
 export async function signInWithGoogle() {
   try {
     const result = await signInWithPopup(auth, provider);
     return result.user;
   } catch (err: unknown) {
     const code = (err as { code?: string })?.code ?? "";
-    if (REDIRECT_FALLBACK_CODES.has(code)) {
-      await signInWithRedirect(auth, provider);
-      return null;
-    }
-    throw err;
+    // User explicitly cancelled — don't redirect
+    if (code === "auth/user-cancelled") throw err;
+    // All other popup failures → fall back to redirect
+    await signInWithRedirect(auth, provider);
+    return null;
   }
 }
 

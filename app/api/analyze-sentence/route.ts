@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { toTraditional } from "@/lib/utils/tcConvert";
 
 export async function POST(req: NextRequest) {
   try {
@@ -51,7 +52,7 @@ export async function POST(req: NextRequest) {
       const data = await res.json();
       const bonus = data.choices?.[0]?.message?.content?.trim();
       if (!bonus) throw new Error("empty response");
-      return NextResponse.json({ analysis: bonus });
+      return NextResponse.json({ analysis: toTraditional(bonus) });
     }
 
     if (reversed) {
@@ -127,7 +128,7 @@ export async function POST(req: NextRequest) {
     const analysis = data.choices?.[0]?.message?.content?.trim();
     if (!analysis) throw new Error("empty response");
 
-    return NextResponse.json({ analysis });
+    return NextResponse.json({ analysis: toTraditional(analysis) });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error("analyze-sentence error:", msg);

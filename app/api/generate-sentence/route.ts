@@ -1,5 +1,6 @@
 import { getMbtiBlock } from "@/lib/utils/mbtiUtils";
 import { GenerateSentenceRequest, CalendarType, MBTIType } from "@/types";
+import { toTraditional } from "@/lib/utils/tcConvert";
 
 const POSITIVE_STYLE_POOL = [
   "用一個具體的生活場景切入，讓人感覺是今天早上剛發生的事",
@@ -160,7 +161,7 @@ export async function POST(req: Request) {
       });
       const data = await res.json();
       const sentence = data.choices?.[0]?.message?.content?.trim();
-      if (sentence) return Response.json({ sentence });
+      if (sentence) return Response.json({ sentence: toTraditional(sentence) });
     }
   } catch (err) {
     console.warn("AI generation failed, using fallback:", err instanceof Error ? err.message : err);

@@ -1,23 +1,67 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signInWithGoogle } from "@/lib/firebase/auth";
+
+function isInAppBrowser(): boolean {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent;
+  return /Line\/|FBAN|FBAV|Instagram|Telegram|MicroMessenger|Twitter/i.test(ua);
+}
 
 export function GoogleSignInButton() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [inApp, setInApp] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    setInApp(isInAppBrowser());
+  }, []);
 
   async function handleSignIn() {
     setIsLoading(true);
     setError(null);
     try {
       await signInWithGoogle();
-      // signInWithRedirect navigates away — no need to setIsLoading(false)
     } catch (err) {
       console.error("Google sign in error:", err);
       setError("登入失敗，請再試一次");
       setIsLoading(false);
     }
+  }
+
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+    }
+  }
+
+  // In-app browser: show open-in-browser prompt
+  if (inApp) {
+    return (
+      <div className="flex flex-col items-center gap-4 text-center px-2">
+        <div className="bg-white/90 rounded-2xl px-6 py-5 shadow-md flex flex-col items-center gap-3">
+          <p className="text-gray-700 font-semibold text-base">請在瀏覽器中開啟</p>
+          <p className="text-gray-500 text-sm leading-relaxed">
+            目前在 App 內建瀏覽器，<br />無法使用 Google 登入。
+          </p>
+          <p className="text-gray-400 text-xs">
+            請點右上角選單 → 「在瀏覽器中開啟」
+          </p>
+          <button
+            onClick={handleCopy}
+            className="mt-1 flex items-center gap-2 bg-gray-100 text-gray-600 text-sm font-medium px-5 py-2.5 rounded-xl border border-gray-200"
+          >
+            {copied ? "✓ 已複製連結" : "複製連結"}
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
